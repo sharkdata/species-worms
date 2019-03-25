@@ -12,7 +12,8 @@ Check that Python3, venv and git is installed. Create a directory for the code. 
     python3 -m venv venv
     source venv/bin/activate # Use "venv\Scripts\activate" instead on Windows.
     cd species
-    pip install -r Requirements.txt
+    pip install -r requirements.txt
+    pip list
 
 I you just want to use the library:
 
