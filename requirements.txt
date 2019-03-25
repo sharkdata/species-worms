@@ -1,0 +1,11 @@
+#
+# Installations needed to run SHARKdata-species.
+#
+# Command:
+# pip install -r requirements.txt
+#
+
+pandas
+openpyxl
+xlsxwriter
+jupyter
