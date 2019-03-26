@@ -9,7 +9,9 @@ import pathlib
 import worms_rest_client
 
 class SharkSpeciesListGenerator():
-    """ """
+    """ 
+        For usage instructions check "https://github.com/sharkdata/species".
+    """
     def __init__(self):
         """ """
         self.clear()
@@ -30,11 +32,57 @@ class SharkSpeciesListGenerator():
         self.taxa_worms_dict = {} # Key: scientific_name.
         self.translate_to_worms_header = {}
         self.translate_to_worms_dict = {} # Key: scientific_name.
-        # Errors and missing taxa.
+        # Errors.
         self.errors_list = []
-        self.missing_taxa_list = []
         # Working area.
         self.higher_taxa_dict = {} # Key: aphia_id.
+    
+    def define_out_headers(self):
+        """ """
+        self.translate_to_worms_header = [
+            'scientific_name_from', 
+            'aphia_id_from', 
+            'dyntaxa_from', 
+            'scientific_name_to', 
+            'aphia_id_to', 
+            'dyntaxa_to',
+            ]
+        
+        self.rename_worms_header_items = {
+            'AphiaID': 'aphia_id', 
+            'valid_AphiaID': 'valid_aphia_id', 
+            'scientificname': 'scientific_name', 
+            }
+        
+        self.taxa_worms_header = [
+            'scientific_name',
+            'aphia_id',
+            'parent_scientific_name', 
+            'parent_aphia_id', 
+            'rank',
+            'authority',
+            'status',
+            'kingdom',
+            'phylum',
+            'class',
+            'order',
+            'family',
+            'genus',
+#             'isBrackish',
+#             'isExtinct',
+#             'isFreshwater',
+#             'isMarine',
+#             'isTerrestrial',
+#             'unacceptreason',
+#             'valid_AphiaID',
+#             'valid_authority',
+#             'valid_name',
+#             'citation',
+#             'url',
+#             'lsid',
+#             'match_type',
+#             'modified',
+            ]
     
     def run_all(self):
         """ """
@@ -69,7 +117,6 @@ class SharkSpeciesListGenerator():
                     aphia_id, error = self.worms_client.get_aphia_id_by_name(scientific_name)
                     if error:
                         self.errors_list.append([scientific_name, '', error])
-                        self.missing_taxa_list.append([scientific_name, ''])
                         aphia_id = ''
                         
                 if aphia_id:
@@ -141,10 +188,13 @@ class SharkSpeciesListGenerator():
                             else:
                                 current_node = None
                     
-        # Add higher taxa to WoRMS dictionary.
+        # Step 4. Add higher taxa to WoRMS dictionary.
         for aphia_id, worms_dict in self.higher_taxa_dict.items():
             scientific_name = worms_dict.get('scientific_name', '')
             if scientific_name not in self.taxa_worms_dict:
+                
+                print('- Processing higher taxa: ', scientific_name)
+
                 worms_rec, error = self.worms_client.get_record_by_aphiaid(aphia_id)
                 if error:
                     self.errors_list.append(['', aphia_id, error])
@@ -154,7 +204,7 @@ class SharkSpeciesListGenerator():
                     
                 self.taxa_worms_dict[scientific_name] = worms_rec
         
-        # Add parent info to built classification hierarchies.
+        # Step 5. Add parent info to built classification hierarchies.
         for scientific_name, taxa_dict in self.taxa_worms_dict.items():
             aphia_id = taxa_dict.get('AphiaID', '')
             higher_taxa_dict = self.higher_taxa_dict.get(aphia_id, None)
@@ -162,84 +212,31 @@ class SharkSpeciesListGenerator():
                 taxa_dict['parent_aphia_id'] = higher_taxa_dict.get('parent_aphia_id', '')
                 taxa_dict['parent_scientific_name'] = higher_taxa_dict.get('parent_scientific_name', '')
         
-        # Add old taxa.
+        # Step 6. Add old taxa.
         for scientific_name in self.old_taxa_worms_dict.keys():
             if scientific_name not in self.taxa_worms_dict:
                 self.taxa_worms_dict[scientific_name] = self.old_taxa_worms_dict[scientific_name]
 
-        # Add old translate.
+        # Step 7. Add old translate.
         for scientific_name in self.old_translate_worms_dict.keys():
             if scientific_name not in self.translate_to_worms_dict:
                 self.translate_to_worms_dict[scientific_name] = self.old_translate_worms_dict[scientific_name]
-
         
-        
-        # Step ???: Save errors.
+        # Step 8. Save errors.
         self.save_errors()
-        self.save_missing_taxa()
         
-        # Step ???: Save the results.
+        # Step 9. Save the results.
         self.save_taxa_worms()
         self.save_translate_to_worms()
         
         print('\nDone...')
-    
-    
-    #############################################
-    
-    def define_out_headers(self):
-        """ """
-        self.translate_to_worms_header = [
-            'scientific_name_from', 
-            'aphia_id_from', 
-            'dyntaxa_from', 
-            'scientific_name_to', 
-            'aphia_id_to', 
-            'dyntaxa_to',
-            ]
-        
-        self.rename_worms_header_items = {
-            'AphiaID': 'aphia_id', 
-            'valid_AphiaID': 'valid_aphia_id', 
-            'scientificname': 'scientific_name', 
-            }
-        
-        self.taxa_worms_header = [
-            'scientific_name',
-            'aphia_id',
-            'parent_scientific_name', 
-            'parent_aphia_id', 
-            'rank',
-            'authority',
-            'status',
-            'kingdom',
-            'phylum',
-            'class',
-            'order',
-            'family',
-            'genus',
-#             'isBrackish',
-#             'isExtinct',
-#             'isFreshwater',
-#             'isMarine',
-#             'isTerrestrial',
-#             'unacceptreason',
-#             'valid_AphiaID',
-#             'valid_authority',
-#             'valid_name',
-#             'citation',
-#             'url',
-#             'lsid',
-#             'match_type',
-#             'modified',
-            ]
     
     def import_species_list(self):
         """ """
         indata_species = pathlib.Path('data_in/indata_species_by_name.txt')
         if indata_species.exists():
             print('Importing file: ', indata_species)
-            with indata_species.open('r', encoding='cp1252') as indata_file:
+            with indata_species.open('r', encoding='cp1252', errors = 'ignore') as indata_file:
                 for row in indata_file:
                     row = row.strip()
                     if row:
@@ -257,7 +254,7 @@ class SharkSpeciesListGenerator():
         indata_worms = pathlib.Path('data_in/taxa_worms.txt')
         if indata_worms.exists():
             print('Importing file: ', indata_worms)
-            with indata_worms.open('r', encoding='cp1252') as indata_file:
+            with indata_worms.open('r', encoding='cp1252', errors = 'ignore') as indata_file:
                 header = None
                 for row in indata_file:
                     row = [item.strip() for item in row.strip().split('\t')]
@@ -275,7 +272,7 @@ class SharkSpeciesListGenerator():
         indata_translate = pathlib.Path('data_in/translate_to_worms.txt')
         if indata_translate.exists():
             print('Importing file: ', indata_translate)
-            with indata_translate.open('r', encoding='cp1252') as indata_file:
+            with indata_translate.open('r', encoding='cp1252', errors = 'ignore') as indata_file:
                 header = None
                 for row in indata_file:
                     row = [item.strip() for item in row.strip().split('\t')]
@@ -291,50 +288,51 @@ class SharkSpeciesListGenerator():
     def save_taxa_worms(self):
         """ """
         taxa_worms_file = pathlib.Path('data_out/taxa_worms.txt')
-        with taxa_worms_file.open('w', encoding='cp1252') as outdata_file:
+        with taxa_worms_file.open('w', encoding='cp1252', errors = 'ignore') as outdata_file:
             outdata_file.write('\t'.join(self.taxa_worms_header) + '\n')
-            for taxa, taxa_rec in self.taxa_worms_dict.items():
+            for _taxa, taxa_rec in self.taxa_worms_dict.items():
                 row = []
                 for header_item in self.taxa_worms_header:
                     row.append(str(taxa_rec.get(header_item, '')))
-                outdata_file.write('\t'.join(row) + '\n')
-        
+                try:
+                    outdata_file.write('\t'.join(row) + '\n')
+                except Exception as e:
+                    try: print('Exception when writing to taxa_worms.txt: ', row[0], '   ', e)
+                    except: pass
+                    
     def save_translate_to_worms(self):
         """ """
         taxa_worms_file = pathlib.Path('data_out/translate_to_worms.txt')
-        with taxa_worms_file.open('w', encoding='cp1252') as outdata_file:
+        with taxa_worms_file.open('w', encoding='cp1252', errors = 'ignore') as outdata_file:
             outdata_file.write('\t'.join(self.translate_to_worms_header) + '\n')
             for taxa_rec in self.translate_to_worms_dict.values():
                 row = []
                 for header_item in self.translate_to_worms_header:
                     row.append(str(taxa_rec.get(header_item, '')))
-                outdata_file.write('\t'.join(row) + '\n')
+                try:
+                    outdata_file.write('\t'.join(row) + '\n')
+                except Exception as e:
+                    try: print('Exception when writing to taxa_worms.txt: ', row[0], '   ', e)
+                    except: pass
     
     def save_errors(self):
         """ """
         header = ['scientific_name', 'aphia_id', 'error']
         errors_file = pathlib.Path('data_out/errors.txt')
-        with errors_file.open('w', encoding='cp1252') as outdata_file:
+        with errors_file.open('w', encoding='cp1252', errors = 'ignore') as outdata_file:
             outdata_file.write('\t'.join(header) + '\n')
             for row in self.errors_list:
-                outdata_file.write('\t'.join(row) + '\n')
-    
-    def save_missing_taxa(self):
-        """ """
-        header = ['scientific_name', 'aphia_id']
-        errors_file = pathlib.Path('data_out/missing_taxa.txt')
-        with errors_file.open('w', encoding='cp1252') as outdata_file:
-            outdata_file.write('\t'.join(header) + '\n')
-            for row in self.missing_taxa_list:
-                outdata_file.write('\t'.join(row) + '\n')
-    
-    
-    #############################################
-    
+                try:
+                    outdata_file.write('\t'.join(row) + '\n')
+                except Exception as e:
+                    try: print('Exception when writing to taxa_worms.txt: ', row[0], '   ', e)
+                    except: pass
+
+
+##### MAIN ########################################
 if __name__ == "__main__":
     """ """
     taxa_mgr = SharkSpeciesListGenerator()
     
     taxa_mgr.run_all()
-    
-    
+
