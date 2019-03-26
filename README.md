@@ -1,7 +1,7 @@
 # Species
 
 Python code used to keep the national marine monitoring species lists in sync with 
-WoRMS, World register of Marine Species (http://www.marinespecies.org/).
+WoRMS, World Register of Marine Species (http://www.marinespecies.org/).
 
 WoRMS REST webservice (http://www.marinespecies.org/rest/) is used to access WoRMS. 
 
@@ -43,9 +43,9 @@ To fix the errors, you have to check out valid AphiaID (http://www.marinespecies
 them manually to a copy of the **translate_to_worms.txt** file. Put that file in the **indata** directory.
 Next time you run the program those taxa will be added to the **taxa_worms.txt** and **translate_to_worms.txt** files.
 
-If you want to add a few new taxa to exitings file, the you can move the files **taxa_worms.txt** and **translate_to_worms.txt**
+If you want to add a few new taxa to exitings files, then you can copy the files **taxa_worms.txt** and **translate_to_worms.txt**
 from the **data_out** directory to the **data_in** directory and add the new species to the **data_in/indata_species_by_name.txt** file.
-Then it will run must faster since WoRMS is only called for the new species.
+Then it will run must faster since WoRMS is only called for the new taxa.
 
 ## Contact info
 
