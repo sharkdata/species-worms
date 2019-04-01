@@ -56,10 +56,10 @@ class SharkSpeciesListGenerator():
         
         self.taxa_worms_header = [
             'scientific_name',
-            'aphia_id',
-            'parent_scientific_name', 
-            'parent_aphia_id', 
             'rank',
+            'aphia_id',
+            'parent_name', 
+            'parent_id', 
             'authority',
             'status',
             'kingdom',
@@ -68,6 +68,7 @@ class SharkSpeciesListGenerator():
             'order',
             'family',
             'genus',
+            'classification', 
 #             'isBrackish',
 #             'isExtinct',
 #             'isFreshwater',
@@ -124,6 +125,10 @@ class SharkSpeciesListGenerator():
                     if error:
                         self.errors_list.append(['', aphia_id, error])
                     else:
+                        # Replace 'None' by space.
+                        for key in worms_rec.keys():
+                            if worms_rec[key] in ['None', None]:
+                                worms_rec[key] = ''
                         # Translate keys from WoRMS.
                         for from_key, to_key in self.rename_worms_header_items.items():
                             worms_rec[to_key] = worms_rec.get(from_key, '')
@@ -142,6 +147,10 @@ class SharkSpeciesListGenerator():
                                 worms_rec, error = self.worms_client.get_record_by_aphiaid(valid_aphia_id)
                                 if error:
                                     self.errors_list.append(['', valid_aphia_id, error])
+                                # Replace 'None' by space.
+                                for key in worms_rec.keys():
+                                    if worms_rec[key] in ['None', None]:
+                                        worms_rec[key] = ''
                                 # Translate keys from WoRMS.
                                 for from_key, to_key in self.rename_worms_header_items.items():
                                     worms_rec[to_key] = worms_rec.get(from_key, '')
@@ -160,6 +169,10 @@ class SharkSpeciesListGenerator():
                         worms_rec, error = self.worms_client.get_classification_by_aphiaid(valid_aphia_id)
                         if error:
                             self.errors_list.append(['', valid_aphia_id, error])
+                        # Replace 'None' by space.
+                        for key in worms_rec.keys():
+                            if worms_rec[key] in ['None', None]:
+                                worms_rec[key] = ''
                         # Translate keys from WoRMS.
                         for from_key, to_key in self.rename_worms_header_items.items():
                             worms_rec[to_key] = worms_rec.get(from_key, '')
@@ -169,9 +182,9 @@ class SharkSpeciesListGenerator():
                         scientific_name = None
                         current_node = worms_rec
                         while current_node is not None:
-                            parent_aphia_id = aphia_id
+                            parent_id = aphia_id
 #                             parent_rank = rank
-                            parent_scientific_name = scientific_name
+                            parent_name = scientific_name
                             aphia_id = current_node.get('AphiaID', '')
                             rank = current_node.get('rank', '')
                             scientific_name = current_node.get('scientificname', '')
@@ -180,8 +193,12 @@ class SharkSpeciesListGenerator():
                                 taxa_dict['aphia_id'] = aphia_id
                                 taxa_dict['rank'] = rank
                                 taxa_dict['scientific_name'] = scientific_name
-                                taxa_dict['parent_aphia_id'] = parent_aphia_id
-                                taxa_dict['parent_scientific_name'] = parent_scientific_name
+                                taxa_dict['parent_id'] = parent_id
+                                taxa_dict['parent_name'] = parent_name
+                                # Replace 'None' by space.
+                                for key in taxa_dict.keys():
+                                    if taxa_dict[key] in ['None', None]:
+                                        taxa_dict[key] = ''
                                 if aphia_id not in self.higher_taxa_dict:
                                     self.higher_taxa_dict[aphia_id] = taxa_dict
                                 current_node = current_node.get('child', None)
@@ -198,6 +215,10 @@ class SharkSpeciesListGenerator():
                 worms_rec, error = self.worms_client.get_record_by_aphiaid(aphia_id)
                 if error:
                     self.errors_list.append(['', aphia_id, error])
+                # Replace 'None' by space.
+                for key in worms_rec.keys():
+                    if worms_rec[key] in ['None', None]:
+                        worms_rec[key] = ''
                 # Translate keys from WoRMS.
                 for from_key, to_key in self.rename_worms_header_items.items():
                     worms_rec[to_key] = worms_rec.get(from_key, '')
@@ -209,8 +230,8 @@ class SharkSpeciesListGenerator():
             aphia_id = taxa_dict.get('AphiaID', '')
             higher_taxa_dict = self.higher_taxa_dict.get(aphia_id, None)
             if higher_taxa_dict:
-                taxa_dict['parent_aphia_id'] = higher_taxa_dict.get('parent_aphia_id', '')
-                taxa_dict['parent_scientific_name'] = higher_taxa_dict.get('parent_scientific_name', '')
+                taxa_dict['parent_id'] = higher_taxa_dict.get('parent_id', '')
+                taxa_dict['parent_name'] = higher_taxa_dict.get('parent_name', '')
         
         # Step 6. Add old taxa.
         for scientific_name in self.old_taxa_worms_dict.keys():
@@ -222,10 +243,22 @@ class SharkSpeciesListGenerator():
             if scientific_name not in self.translate_to_worms_dict:
                 self.translate_to_worms_dict[scientific_name] = self.old_translate_worms_dict[scientific_name]
         
-        # Step 8. Save errors.
+        # Step 8. Add classification.
+        for scientific_name in list(self.taxa_worms_dict.keys()):
+            classification_list = []
+            taxon_dict = self.taxa_worms_dict[scientific_name]
+            while taxon_dict:
+                classification_list.append('[' + taxon_dict.get('rank', '') + '] ' + taxon_dict.get('scientific_name', ''))
+                # Parents.
+                parent_name = taxon_dict.get('parent_name', '')
+                taxon_dict = self.taxa_worms_dict.get(parent_name, None)
+            #
+            self.taxa_worms_dict[scientific_name]['classification'] = ' - '.join(classification_list[::-1])
+        
+        # Step 9. Save errors.
         self.save_errors()
         
-        # Step 9. Save the results.
+        # Step 10. Save the results.
         self.save_taxa_worms()
         self.save_translate_to_worms()
         
