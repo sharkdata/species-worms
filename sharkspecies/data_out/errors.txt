@@ -1,2 +1,0 @@
-scientific_name	aphia_id	error
-Alba alba		Species: Alba alba  Response code: 204

@@ -1,33 +1,29 @@
 # Species
 
-Python code used to keep the national marine monitoring species lists in sync with 
+Python code used to keep marine monitoring species lists in sync with 
 WoRMS, World Register of Marine Species (http://www.marinespecies.org/).
 
-WoRMS REST webservice (http://www.marinespecies.org/rest/) is used to access WoRMS. 
+The WoRMS REST webservice (http://www.marinespecies.org/rest/) is used to access WoRMS. 
 
 ## Installation
 
-Check that Python3, venv and git is installed. Create a directory for the code. Start a terminal window (CMD on Windows).
+Check that Python3, venv and git are installed. Create a directory for the code. Start a terminal window.
 
-    cd path-to-the-new-directory
-    git clone https://github.com/sharkdata/species.git
-    python -m venv venv
-    source venv/bin/activate # Use "venv\Scripts\activate" instead on Windows.
-    cd species
+    git clone https://github.com/sharkdata/species.git .
+    python3 -m venv venv
+    source venv/bin/activate # On Windows "venv\Scripts\activate".
     pip install -r requirements.txt 
-    pip list
 
 ## Usage
 
 Edit the file **data_in/indata_species_by_name.txt**. 
 
-Add scientific names for the species you want to have in your list. Only species, and below in rank, 
-will be processed. Higher taxa will be automatically generated based on the classification for
-each species in the list.
+Add scientific names for the species you want to have in your list. 
+Higher taxa will be automatically generated based on the classification for
+each taxa in the list.
 
 Run the command:
 
-    cd sharkspecies
     python shark_species_main.py
 
 Check the files in **data_out**. You will find some tab delimited text files (that easily 
