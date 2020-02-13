@@ -4,7 +4,7 @@
 # Copyright (c) 2019-present SMHI, Swedish Meteorological and Hydrological Institute 
 # License: MIT License (see LICENSE.txt or http://opensource.org/licenses/mit).
 
-from . import wormsextractor
+import wormsextractor
 
 if __name__ == "__main__":
     """ """

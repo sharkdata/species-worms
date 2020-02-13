@@ -6,7 +6,7 @@
 
 import pathlib
 
-import worms_rest_client
+from wormsextractor import worms_rest_client
 
 class SharkSpeciesListGenerator():
     """ 
@@ -23,7 +23,6 @@ class SharkSpeciesListGenerator():
     def clear(self):
         """ """
         # Indata:
-        self.indata_header = None
         self.indata_species_list = [] # Rank: Species or below.
         self.old_taxa_worms_dict = {} # Key: scientific_name.
         self.old_translate_worms_dict = {} # Key: scientific_name.
@@ -266,20 +265,23 @@ class SharkSpeciesListGenerator():
     
     def import_species_list(self):
         """ """
-        indata_species = pathlib.Path('data_in/indata_species_by_name.txt')
+        indata_species = pathlib.Path('data_in/indata_taxa_by_name.txt')
         if indata_species.exists():
             print('Importing file: ', indata_species)
             with indata_species.open('r', encoding='cp1252', errors = 'ignore') as indata_file:
+                header = None
                 for row in indata_file:
-                    row = row.strip()
+                    row = [item.strip() for item in row.strip().split('\t')]
                     if row:
-                        if self.indata_header is None:
-                            self.indata_header = row
+                        if header is None:
+                            header = row
                         else:
-                            if (len(row) > 4) and (' ' in row):
-                                self.indata_species_list.append(row)
+                            row_dict = dict(zip(header, row))
+                            scientific_name = row_dict.get('scientific_name', '')
+                            if (len(scientific_name) > 4) and (' ' in scientific_name):
+                                self.indata_species_list.append(scientific_name)
                             else:
-                                print('- Species not valid: ', row)
+                                print('- Species not valid: ', scientific_name)
             print('')
         
     def import_old_taxa_worms(self):

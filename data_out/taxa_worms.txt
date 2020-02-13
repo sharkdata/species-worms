@@ -1,14 +1,16 @@
-scientific_name	aphia_id	parent_scientific_name	parent_aphia_id	rank	authority	status	kingdom	phylum	class	order	family	genus
-Limecola balthica	880017	Limecola	715043	Species	(Linnaeus, 1758)	accepted	Animalia	Mollusca	Bivalvia	Cardiida	Tellinidae	Limecola
-Biota	1	None	None	None	None	accepted	None	None	None	None	None	None
-Animalia	2	Biota	1	Kingdom	None	accepted	Animalia	None	None	None	None	None
-Mollusca	51	Animalia	2	Phylum	None	accepted	Animalia	Mollusca	None	None	None	None
-Bivalvia	105	Mollusca	51	Class	Linnaeus, 1758	accepted	Animalia	Mollusca	Bivalvia	None	None	None
-Heterodonta	216	Bivalvia	105	Subclass	Neumayr, 1884	accepted	Animalia	Mollusca	Bivalvia	None	None	None
-Euheterodonta	382296	Heterodonta	216	Infraclass	None	accepted	Animalia	Mollusca	Bivalvia	None	None	None
-Imparidentia	869600	Euheterodonta	382296	Superorder	Bieler, P. M. Mikkelsen & Giribet, 2014	accepted	Animalia	Mollusca	Bivalvia	None	None	None
-Cardiida	869602	Imparidentia	869600	Order	Ferussac, 1822	accepted	Animalia	Mollusca	Bivalvia	Cardiida	None	None
-Tellinoidea	14636	Cardiida	869602	Superfamily	Blainville, 1814	accepted	Animalia	Mollusca	Bivalvia	Cardiida	None	None
-Tellinidae	235	Tellinoidea	14636	Family	Blainville, 1814	accepted	Animalia	Mollusca	Bivalvia	Cardiida	Tellinidae	None
-Macominae	225471	Tellinidae	235	Subfamily	Olsson, 1961	accepted	Animalia	Mollusca	Bivalvia	Cardiida	Tellinidae	None
-Limecola	715043	Macominae	225471	Genus	T. Brown, 1844	accepted	Animalia	Mollusca	Bivalvia	Cardiida	Tellinidae	Limecola
+scientific_name	rank	aphia_id	parent_name	parent_id	authority	status	kingdom	phylum	class	order	family	genus	classification
+Limecola balthica	Species	880017	Limecola	715043	(Linnaeus, 1758)	accepted	Animalia	Mollusca	Bivalvia	Cardiida	Tellinidae	Limecola	[] Biota - [Kingdom] Animalia - [Phylum] Mollusca - [Class] Bivalvia - [Subclass] Heterodonta - [Infraclass] Euheterodonta - [Superorder] Imparidentia - [Order] Cardiida - [Superfamily] Tellinoidea - [Family] Tellinidae - [Subfamily] Macominae - [Genus] Limecola - [Species] Limecola balthica
+Macoma calcarea	Species	141580	Macoma	138531	(Gmelin, 1791)	accepted	Animalia	Mollusca	Bivalvia	Cardiida	Tellinidae	Macoma	[] Biota - [Kingdom] Animalia - [Phylum] Mollusca - [Class] Bivalvia - [Subclass] Heterodonta - [Infraclass] Euheterodonta - [Superorder] Imparidentia - [Order] Cardiida - [Superfamily] Tellinoidea - [Family] Tellinidae - [Subfamily] Macominae - [Genus] Macoma - [Species] Macoma calcarea
+Biota		1				accepted							[] Biota
+Animalia	Kingdom	2	Biota	1		accepted	Animalia						[] Biota - [Kingdom] Animalia
+Mollusca	Phylum	51	Animalia	2		accepted	Animalia	Mollusca					[] Biota - [Kingdom] Animalia - [Phylum] Mollusca
+Bivalvia	Class	105	Mollusca	51	Linnaeus, 1758	accepted	Animalia	Mollusca	Bivalvia				[] Biota - [Kingdom] Animalia - [Phylum] Mollusca - [Class] Bivalvia
+Heterodonta	Subclass	216	Bivalvia	105	Neumayr, 1884	accepted	Animalia	Mollusca	Bivalvia				[] Biota - [Kingdom] Animalia - [Phylum] Mollusca - [Class] Bivalvia - [Subclass] Heterodonta
+Euheterodonta	Infraclass	382296	Heterodonta	216		accepted	Animalia	Mollusca	Bivalvia				[] Biota - [Kingdom] Animalia - [Phylum] Mollusca - [Class] Bivalvia - [Subclass] Heterodonta - [Infraclass] Euheterodonta
+Imparidentia	Superorder	869600	Euheterodonta	382296	Bieler, P. M. Mikkelsen & Giribet, 2014	accepted	Animalia	Mollusca	Bivalvia				[] Biota - [Kingdom] Animalia - [Phylum] Mollusca - [Class] Bivalvia - [Subclass] Heterodonta - [Infraclass] Euheterodonta - [Superorder] Imparidentia
+Cardiida	Order	869602	Imparidentia	869600	Ferussac, 1822	accepted	Animalia	Mollusca	Bivalvia	Cardiida			[] Biota - [Kingdom] Animalia - [Phylum] Mollusca - [Class] Bivalvia - [Subclass] Heterodonta - [Infraclass] Euheterodonta - [Superorder] Imparidentia - [Order] Cardiida
+Tellinoidea	Superfamily	14636	Cardiida	869602	Blainville, 1814	accepted	Animalia	Mollusca	Bivalvia	Cardiida			[] Biota - [Kingdom] Animalia - [Phylum] Mollusca - [Class] Bivalvia - [Subclass] Heterodonta - [Infraclass] Euheterodonta - [Superorder] Imparidentia - [Order] Cardiida - [Superfamily] Tellinoidea
+Tellinidae	Family	235	Tellinoidea	14636	Blainville, 1814	accepted	Animalia	Mollusca	Bivalvia	Cardiida	Tellinidae		[] Biota - [Kingdom] Animalia - [Phylum] Mollusca - [Class] Bivalvia - [Subclass] Heterodonta - [Infraclass] Euheterodonta - [Superorder] Imparidentia - [Order] Cardiida - [Superfamily] Tellinoidea - [Family] Tellinidae
+Macominae	Subfamily	225471	Tellinidae	235	Olsson, 1961	accepted	Animalia	Mollusca	Bivalvia	Cardiida	Tellinidae		[] Biota - [Kingdom] Animalia - [Phylum] Mollusca - [Class] Bivalvia - [Subclass] Heterodonta - [Infraclass] Euheterodonta - [Superorder] Imparidentia - [Order] Cardiida - [Superfamily] Tellinoidea - [Family] Tellinidae - [Subfamily] Macominae
+Limecola	Genus	715043	Macominae	225471	T. Brown, 1844	accepted	Animalia	Mollusca	Bivalvia	Cardiida	Tellinidae	Limecola	[] Biota - [Kingdom] Animalia - [Phylum] Mollusca - [Class] Bivalvia - [Subclass] Heterodonta - [Infraclass] Euheterodonta - [Superorder] Imparidentia - [Order] Cardiida - [Superfamily] Tellinoidea - [Family] Tellinidae - [Subfamily] Macominae - [Genus] Limecola
+Macoma	Genus	138531	Macominae	225471	Leach, 1819	accepted	Animalia	Mollusca	Bivalvia	Cardiida	Tellinidae	Macoma	[] Biota - [Kingdom] Animalia - [Phylum] Mollusca - [Class] Bivalvia - [Subclass] Heterodonta - [Infraclass] Euheterodonta - [Superorder] Imparidentia - [Order] Cardiida - [Superfamily] Tellinoidea - [Family] Tellinidae - [Subfamily] Macominae - [Genus] Macoma
