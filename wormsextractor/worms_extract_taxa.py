@@ -30,12 +30,13 @@ class SharkSpeciesListGenerator:
         self.indata_name_list = []
         self.indata_aphia_id_list = []
         self.old_taxa_worms_dict = {}  # Key: scientific_name.
-        self.old_taxa_worms_by_aphia_id_dict = {}
+        self.old_taxa_worms_by_aphia_id_dict = {}  # Key: AphiaID.
         self.old_translate_worms_dict = {}  # Key: scientific_name.
         self.old_translate_worms_by_aphia_id_dict = {}
         # Outdata.
         self.taxa_worms_header = {}
         self.taxa_worms_dict = {}  # Key: scientific_name.
+        self.taxa_worms_by_aphia_id_dict = {}  # Key: AphiaID.
         self.translate_to_worms_header = {}
         self.translate_to_worms_dict = {}  # Key: scientific_name.
         self.errors_list = []  # Errors.
@@ -100,9 +101,13 @@ class SharkSpeciesListGenerator:
         self.prepare_list_of_taxa()
 
         self.check_taxa_in_worms()
+        self.save_results()
 
         self.add_higher_taxa()
+        self.save_results()
+
         self.add_parent_info()
+        self.save_results()
 
         self.add_old_taxa()
         self.add_old_translate()
@@ -141,6 +146,9 @@ class SharkSpeciesListGenerator:
         for scientific_name in self.indata_name_list:
             if scientific_name not in self.old_translate_worms_dict:
                 if scientific_name not in self.old_taxa_worms_dict:
+
+                    print("Preparing: ", scientific_name)
+
                     aphia_id, error = self.worms_client.get_aphia_id_by_name(
                         scientific_name
                     )
@@ -159,6 +167,7 @@ class SharkSpeciesListGenerator:
                             aphia_id = ""
                         else:
                             # Or at least an accepted name connected to the taxa.
+                            translate_dict = None
                             valid_aphia_id = ""
                             valid_scientific_name = ""
                             for record_dict in record_list:
@@ -169,7 +178,7 @@ class SharkSpeciesListGenerator:
                                     valid_aphia_id = ""
                                     valid_scientific_name = ""
                                     break
-                                # Check for accepted taxa.
+                                # Check for valid taxa.
                                 valid_aphia_id = record_dict.get(
                                     "valid_AphiaID", valid_aphia_id
                                 )
@@ -185,9 +194,10 @@ class SharkSpeciesListGenerator:
                                 ] = valid_scientific_name
                                 translate_dict["aphia_id_from"] = ""
                                 translate_dict["aphia_id_to"] = valid_aphia_id
-                            self.translate_to_worms_dict[
-                                scientific_name
-                            ] = translate_dict
+                                #
+                                self.translate_to_worms_dict[
+                                    scientific_name
+                                ] = translate_dict
 
     def check_taxa_in_worms(self):
         """ """
@@ -216,6 +226,7 @@ class SharkSpeciesListGenerator:
                 # Use valid taxa.
                 if aphia_id == valid_aphia_id:
                     self.taxa_worms_dict[scientific_name] = worms_rec
+                    self.taxa_worms_by_aphia_id_dict[aphia_id] = worms_rec
                 else:
                     # aphia_id, error = worms_rest_client.get_aphia_id_by_name(valid_name)
                     if valid_name not in self.taxa_worms_dict:
@@ -236,6 +247,7 @@ class SharkSpeciesListGenerator:
                             worms_rec[to_key] = worms_rec.get(from_key, "")
                         #
                         self.taxa_worms_dict[valid_name] = worms_rec
+                        self.taxa_worms_by_aphia_id_dict[valid_aphia_id] = worms_rec
                     # Add invalid names to translate file.
                     if scientific_name not in self.translate_to_worms_dict:
                         translate_dict = {}
@@ -307,10 +319,11 @@ class SharkSpeciesListGenerator:
                     worms_rec[to_key] = worms_rec.get(from_key, "")
 
                 self.taxa_worms_dict[scientific_name] = worms_rec
+                self.taxa_worms_by_aphia_id_dict[aphia_id] = worms_rec
 
     def add_parent_info(self):
         """ Add parent info to built classification hierarchies. """
-        for scientific_name, taxa_dict in self.taxa_worms_dict.items():
+        for taxa_dict in self.taxa_worms_dict.values():
             aphia_id = taxa_dict.get("AphiaID", "")
             higher_taxa_dict = self.higher_taxa_dict.get(aphia_id, None)
             if higher_taxa_dict:
@@ -338,16 +351,29 @@ class SharkSpeciesListGenerator:
         for scientific_name in list(self.taxa_worms_dict.keys()):
             classification_list = []
             taxon_dict = self.taxa_worms_dict[scientific_name]
-            while taxon_dict:
+            name = taxon_dict['scientific_name']
+            level_counter = 0  # To avoid recursive enless loops.
+            while len(name) > 0:
+                if level_counter > 20:
+                    print("Warning: Too many levels in classification for: " + scientific_name)
+                    break
+                level_counter += 1
                 classification_list.append(
                     "["
                     + taxon_dict.get("rank", "")
                     + "] "
                     + taxon_dict.get("scientific_name", "")
                 )
+                # # Parents.
+                # parent_name = taxon_dict.get("parent_name", "")
+                # taxon_dict = self.taxa_worms_dict.get(parent_name, None)
                 # Parents.
-                parent_name = taxon_dict.get("parent_name", "")
-                taxon_dict = self.taxa_worms_dict.get(parent_name, None)
+                parent_id = taxon_dict.get("parent_id", "")
+                taxon_dict = self.taxa_worms_by_aphia_id_dict.get(parent_id, None)
+                if taxon_dict:
+                    name = taxon_dict.get('scientific_name', '')
+                else:
+                    name = ''
             #
             self.taxa_worms_dict[scientific_name]["classification"] = " - ".join(
                 classification_list[::-1]
