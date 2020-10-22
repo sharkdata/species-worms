@@ -9,7 +9,7 @@ import pathlib
 from wormsextractor import worms_rest_client
 
 
-class SharkSpeciesListGenerator:
+class SharkSpeciesListGenerator():
     """ 
         For usage instructions check "https://github.com/sharkdata/species".
     """
@@ -275,7 +275,7 @@ class SharkSpeciesListGenerator:
                     rank = None
                     scientific_name = None
                     current_node = worms_rec
-                    while current_node is not None:
+                    while current_node not in [None, ""]:
                         parent_id = aphia_id
                         #                             parent_rank = rank
                         parent_name = scientific_name
