@@ -25,13 +25,13 @@ class WormsRestWebserviceClient:
             + "?marine_only=false"
         )
         url = url.replace(" ", "%20")
-        result = ""
+        result_dict = {}
         error = ""
         try:
             req = urllib.request.Request(url)
             with urllib.request.urlopen(req) as response:
                 if response.getcode() == 200:
-                    result = json.loads(response.read().decode("utf-8"))
+                    result_dict = json.loads(response.read().decode("utf-8"))
                 else:
                     error = (
                         "Species: "
@@ -42,7 +42,7 @@ class WormsRestWebserviceClient:
         except Exception as e:
             error = "Species: " + scientific_name + "  Exception: " + str(e)
         #
-        return (result, error)
+        return (result_dict, error)
 
     def get_record_by_aphiaid(self, aphia_id):
         """  WoRMS REST: AphiaRecordByAphiaID """

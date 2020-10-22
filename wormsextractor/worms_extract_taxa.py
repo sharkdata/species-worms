@@ -203,101 +203,103 @@ class SharkSpeciesListGenerator:
         """ """
         # Iterate over taxa.
         for aphia_id in sorted(self.new_aphia_id_list):
-
-            worms_rec, error = self.worms_client.get_record_by_aphiaid(aphia_id)
-            if error:
-                self.errors_list.append(["", aphia_id, error])
-            else:
-                # Replace 'None' by space.
-                for key in worms_rec.keys():
-                    if worms_rec[key] in ["None", None]:
-                        worms_rec[key] = ""
-                # Translate keys from WoRMS.
-                for from_key, to_key in self.rename_worms_header_items.items():
-                    worms_rec[to_key] = worms_rec.get(from_key, "")
-                #
-                aphia_id = worms_rec.get("AphiaID", "")
-                scientific_name = worms_rec.get("scientificname", "")
-                valid_aphia_id = worms_rec.get("valid_AphiaID", "")
-                valid_name = worms_rec.get("valid_name", "")
-
-                print("Processing: ", scientific_name)
-
-                # Use valid taxa.
-                if aphia_id == valid_aphia_id:
-                    self.taxa_worms_dict[scientific_name] = worms_rec
-                    self.taxa_worms_by_aphia_id_dict[aphia_id] = worms_rec
-                else:
-                    # aphia_id, error = worms_rest_client.get_aphia_id_by_name(valid_name)
-                    if valid_name not in self.taxa_worms_dict:
-                        (worms_rec, error,) = self.worms_client.get_record_by_aphiaid(
-                            valid_aphia_id
-                        )
-                        if error:
-                            self.errors_list.append(["", valid_aphia_id, error])
-                        # Replace 'None' by space.
-                        for key in worms_rec.keys():
-                            if worms_rec[key] in ["None", None]:
-                                worms_rec[key] = ""
-                        # Translate keys from WoRMS.
-                        for (
-                            from_key,
-                            to_key,
-                        ) in self.rename_worms_header_items.items():
-                            worms_rec[to_key] = worms_rec.get(from_key, "")
-                        #
-                        self.taxa_worms_dict[valid_name] = worms_rec
-                        self.taxa_worms_by_aphia_id_dict[valid_aphia_id] = worms_rec
-                    # Add invalid names to translate file.
-                    if scientific_name not in self.translate_to_worms_dict:
-                        translate_dict = {}
-                        translate_dict["scientific_name_from"] = scientific_name
-                        translate_dict["scientific_name_to"] = valid_name
-                        translate_dict["aphia_id_from"] = aphia_id
-                        translate_dict["aphia_id_to"] = valid_aphia_id
-                        self.translate_to_worms_dict[scientific_name] = translate_dict
-
-                # Step 5. Create classification dictionary.
-                (worms_rec, error,) = self.worms_client.get_classification_by_aphiaid(
-                    valid_aphia_id
-                )
+            try:
+                worms_rec, error = self.worms_client.get_record_by_aphiaid(aphia_id)
                 if error:
-                    self.errors_list.append(["", valid_aphia_id, error])
-                # Replace 'None' by space.
-                for key in worms_rec.keys():
-                    if worms_rec[key] in ["None", None]:
-                        worms_rec[key] = ""
-                # Translate keys from WoRMS.
-                for from_key, to_key in self.rename_worms_header_items.items():
-                    worms_rec[to_key] = worms_rec.get(from_key, "")
-                #
-                aphia_id = None
-                rank = None
-                scientific_name = None
-                current_node = worms_rec
-                while current_node is not None:
-                    parent_id = aphia_id
-                    #                             parent_rank = rank
-                    parent_name = scientific_name
-                    aphia_id = current_node.get("AphiaID", "")
-                    rank = current_node.get("rank", "")
-                    scientific_name = current_node.get("scientificname", "")
-                    if aphia_id and rank and scientific_name:
-                        taxa_dict = {}
-                        taxa_dict["aphia_id"] = aphia_id
-                        taxa_dict["rank"] = rank
-                        taxa_dict["scientific_name"] = scientific_name
-                        taxa_dict["parent_id"] = parent_id
-                        taxa_dict["parent_name"] = parent_name
-                        # Replace 'None' by space.
-                        for key in taxa_dict.keys():
-                            if taxa_dict[key] in ["None", None]:
-                                taxa_dict[key] = ""
-                        if aphia_id not in self.higher_taxa_dict:
-                            self.higher_taxa_dict[aphia_id] = taxa_dict
-                        current_node = current_node.get("child", None)
+                    self.errors_list.append(["", aphia_id, error])
+                else:
+                    # Replace 'None' by space.
+                    for key in worms_rec.keys():
+                        if worms_rec[key] in ["None", None]:
+                            worms_rec[key] = ""
+                    # Translate keys from WoRMS.
+                    for from_key, to_key in self.rename_worms_header_items.items():
+                        worms_rec[to_key] = worms_rec.get(from_key, "")
+                    #
+                    aphia_id = worms_rec.get("AphiaID", "")
+                    scientific_name = worms_rec.get("scientificname", "")
+                    valid_aphia_id = worms_rec.get("valid_AphiaID", "")
+                    valid_name = worms_rec.get("valid_name", "")
+
+                    print("Processing: ", scientific_name)
+
+                    # Use valid taxa.
+                    if aphia_id == valid_aphia_id:
+                        self.taxa_worms_dict[scientific_name] = worms_rec
+                        self.taxa_worms_by_aphia_id_dict[aphia_id] = worms_rec
                     else:
-                        current_node = None
+                        # aphia_id, error = worms_rest_client.get_aphia_id_by_name(valid_name)
+                        if valid_name not in self.taxa_worms_dict:
+                            (worms_rec, error,) = self.worms_client.get_record_by_aphiaid(
+                                valid_aphia_id
+                            )
+                            if error:
+                                self.errors_list.append(["", valid_aphia_id, error])
+                            # Replace 'None' by space.
+                            for key in worms_rec.keys():
+                                if worms_rec[key] in ["None", None]:
+                                    worms_rec[key] = ""
+                            # Translate keys from WoRMS.
+                            for (
+                                from_key,
+                                to_key,
+                            ) in self.rename_worms_header_items.items():
+                                worms_rec[to_key] = worms_rec.get(from_key, "")
+                            #
+                            self.taxa_worms_dict[valid_name] = worms_rec
+                            self.taxa_worms_by_aphia_id_dict[valid_aphia_id] = worms_rec
+                        # Add invalid names to translate file.
+                        if scientific_name not in self.translate_to_worms_dict:
+                            translate_dict = {}
+                            translate_dict["scientific_name_from"] = scientific_name
+                            translate_dict["scientific_name_to"] = valid_name
+                            translate_dict["aphia_id_from"] = aphia_id
+                            translate_dict["aphia_id_to"] = valid_aphia_id
+                            self.translate_to_worms_dict[scientific_name] = translate_dict
+
+                    # Step 5. Create classification dictionary.
+                    (worms_rec, error,) = self.worms_client.get_classification_by_aphiaid(
+                        valid_aphia_id
+                    )
+                    if error:
+                        self.errors_list.append(["", valid_aphia_id, error])
+                    # Replace 'None' by space.
+                    for key in worms_rec.keys():
+                        if worms_rec[key] in ["None", None]:
+                            worms_rec[key] = ""
+                    # Translate keys from WoRMS.
+                    for from_key, to_key in self.rename_worms_header_items.items():
+                        worms_rec[to_key] = worms_rec.get(from_key, "")
+                    #
+                    aphia_id = None
+                    rank = None
+                    scientific_name = None
+                    current_node = worms_rec
+                    while current_node is not None:
+                        parent_id = aphia_id
+                        #                             parent_rank = rank
+                        parent_name = scientific_name
+                        aphia_id = current_node.get("AphiaID", "")
+                        rank = current_node.get("rank", "")
+                        scientific_name = current_node.get("scientificname", "")
+                        if aphia_id and rank and scientific_name:
+                            taxa_dict = {}
+                            taxa_dict["aphia_id"] = aphia_id
+                            taxa_dict["rank"] = rank
+                            taxa_dict["scientific_name"] = scientific_name
+                            taxa_dict["parent_id"] = parent_id
+                            taxa_dict["parent_name"] = parent_name
+                            # Replace 'None' by space.
+                            for key in taxa_dict.keys():
+                                if taxa_dict[key] in ["None", None]:
+                                    taxa_dict[key] = ""
+                            if aphia_id not in self.higher_taxa_dict:
+                                self.higher_taxa_dict[aphia_id] = taxa_dict
+                            current_node = current_node.get("child", None)
+                        else:
+                            current_node = None
+            except Exception as e:
+                print("Exception in check_taxa_in_worms: ", e)
 
     def add_higher_taxa(self):
         """ Add higher taxa to WoRMS dictionary. """
