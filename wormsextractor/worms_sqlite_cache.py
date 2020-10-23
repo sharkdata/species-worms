@@ -33,7 +33,7 @@ class WormsSqliteCache:
                 "CREATE TABLE id_to_valid_id(aphia_id varchar(20) PRIMARY KEY, data json)"
             )
             c.execute(
-                "CREATE TABLE records_by_name(scientific_name varchar(20) PRIMARY KEY, data json)"
+                "CREATE TABLE records_by_name(scientific_name varchar(100) PRIMARY KEY, data json)"
             )
             c.execute(
                 "CREATE TABLE classification(aphia_id varchar(20) PRIMARY KEY, data json)"
