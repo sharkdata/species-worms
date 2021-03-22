@@ -9,15 +9,21 @@ import pathlib
 from wormsextractor import worms_rest_client
 
 
-class SharkSpeciesListGenerator():
-    """ 
-        For usage instructions check "https://github.com/sharkdata/species".
+class SharkSpeciesListGenerator:
+    """
+    For usage instructions check "https://github.com/sharkdata/species".
     """
 
-    def __init__(self, data_in_path="data_in", data_out_path="data_out"):
+    def __init__(
+        self,
+        data_in_path="data_in",
+        data_out_path="data_out",
+        replace_not_valid_taxa=True,
+    ):
         """ """
         self.data_in_path = data_in_path
         self.data_out_path = data_out_path
+        self.replace_not_valid_taxa = replace_not_valid_taxa
         self.clear()
         # Create client for the REST API.
         self.worms_client = worms_rest_client.WormsRestWebserviceClient()
@@ -118,13 +124,13 @@ class SharkSpeciesListGenerator():
         print("\nDone...")
 
     def read_indata_files(self):
-        """ 
-            Import list containing scientific names or aphia_id.
-            The "indata_taxa_by_aphia_id.txt" list can be used for taxa 
-            that are problematic to automatically find in WoRMS.
-            Also imports old versions of "taxa" and "translate" if they are available.
-            Copy them from the "data_out" folder to the "data_in" folder if you 
-            just want to add a few new taxa to the lists. 
+        """
+        Import list containing scientific names or aphia_id.
+        The "indata_taxa_by_aphia_id.txt" list can be used for taxa
+        that are problematic to automatically find in WoRMS.
+        Also imports old versions of "taxa" and "translate" if they are available.
+        Copy them from the "data_out" folder to the "data_in" folder if you
+        just want to add a few new taxa to the lists.
         """
         self.import_taxa_by_name()
         self.import_taxa_by_aphia_id()
@@ -140,6 +146,7 @@ class SharkSpeciesListGenerator():
         for aphia_id in self.indata_aphia_id_list:
             if aphia_id not in self.old_translate_worms_by_aphia_id_dict:
                 if aphia_id not in self.old_taxa_worms_by_aphia_id_dict:
+                    print("Load AphiaID: ", aphia_id)
                     self.new_aphia_id_list.append(str(aphia_id))
 
         # Check scientific name indata list.
@@ -158,46 +165,74 @@ class SharkSpeciesListGenerator():
                     if aphia_id:
                         self.new_aphia_id_list.append(str(aphia_id))
                     else:
-                        # Try to check if there is one accepted taxa in a list of records.
-                        record_list, error = self.worms_client.get_records_by_name(
-                            scientific_name
-                        )
-                        if error:
+                        if not self.replace_not_valid_taxa:
+                            error = "Failed to find this taxa. Replace is not allowed."
                             self.errors_list.append([scientific_name, "", error])
-                            aphia_id = ""
                         else:
-                            # Or at least an accepted name connected to the taxa.
-                            translate_dict = None
-                            valid_aphia_id = ""
-                            valid_scientific_name = ""
-                            for record_dict in record_list:
-                                status = record_dict.get("status", "")
-                                if status == "accepted":
-                                    aphia_id = record_dict.get("AphiaID", "")
-                                    self.new_aphia_id_list.append(str(aphia_id))
-                                    valid_aphia_id = ""
-                                    valid_scientific_name = ""
-                                    break
-                                # Check for valid taxa.
-                                valid_aphia_id = record_dict.get(
-                                    "valid_AphiaID", valid_aphia_id
-                                )
-                                valid_scientific_name = record_dict.get(
-                                    "valid_name", valid_scientific_name
-                                )
-                            # No valid, but an accepted one.
-                            if valid_aphia_id and valid_scientific_name:
-                                translate_dict = {}
-                                translate_dict["scientific_name_from"] = scientific_name
-                                translate_dict[
-                                    "scientific_name_to"
-                                ] = valid_scientific_name
-                                translate_dict["aphia_id_from"] = ""
-                                translate_dict["aphia_id_to"] = valid_aphia_id
-                                #
-                                self.translate_to_worms_dict[
-                                    scientific_name
-                                ] = translate_dict
+                            # Try to check if there is one accepted taxa in a list of records.
+                            record_list, error = self.worms_client.get_records_by_name(
+                                scientific_name
+                            )
+                            if error:
+                                self.errors_list.append([scientific_name, "", error])
+                                aphia_id = ""
+                            else:
+                                # Or at least an accepted name connected to the taxa.
+                                translate_dict = None
+                                valid_aphia_id = ""
+                                valid_scientific_name = ""
+                                for record_dict in record_list:
+                                    status = record_dict.get("status", "")
+                                    if status == "accepted":
+                                        aphia_id = record_dict.get("AphiaID", "")
+                                        self.new_aphia_id_list.append(str(aphia_id))
+                                        valid_aphia_id = ""
+                                        valid_scientific_name = ""
+                                        break
+                                    if status != "accepted":
+                                        unaccepted_aphia_id = record_dict.get(
+                                            "AphiaID", ""
+                                        )
+                                        unaccepted_scientific_name = record_dict.get(
+                                            "scientificname", ""
+                                        )
+                                        if (
+                                            unaccepted_scientific_name
+                                            == scientific_name
+                                        ):
+                                            self.new_aphia_id_list.append(
+                                                str(unaccepted_aphia_id)
+                                            )
+                                            print(
+                                                "DEBUG: ",
+                                                scientific_name,
+                                                "  ",
+                                                status,
+                                                "  ",
+                                                unaccepted_aphia_id,
+                                            )
+                                    # Check for valid taxa.
+                                    valid_aphia_id = record_dict.get(
+                                        "valid_AphiaID", valid_aphia_id
+                                    )
+                                    valid_scientific_name = record_dict.get(
+                                        "valid_name", valid_scientific_name
+                                    )
+                                # No valid, but an accepted one.
+                                if valid_aphia_id and valid_scientific_name:
+                                    translate_dict = {}
+                                    translate_dict[
+                                        "scientific_name_from"
+                                    ] = scientific_name
+                                    translate_dict[
+                                        "scientific_name_to"
+                                    ] = valid_scientific_name
+                                    translate_dict["aphia_id_from"] = ""
+                                    translate_dict["aphia_id_to"] = valid_aphia_id
+                                    #
+                                    self.translate_to_worms_dict[
+                                        scientific_name
+                                    ] = translate_dict
 
     def check_taxa_in_worms(self):
         """ """
@@ -223,46 +258,68 @@ class SharkSpeciesListGenerator():
 
                     print("Processing: ", scientific_name)
 
-                    # Use valid taxa.
-                    if aphia_id == valid_aphia_id:
+                    if not self.replace_not_valid_taxa:
                         self.taxa_worms_dict[scientific_name] = worms_rec
                         self.taxa_worms_by_aphia_id_dict[aphia_id] = worms_rec
+                        # Create classification dictionary.
+                        (
+                            worms_rec,
+                            error,
+                        ) = self.worms_client.get_classification_by_aphiaid(aphia_id)
+                        if error:
+                            self.errors_list.append(["", aphia_id, error])
                     else:
-                        # aphia_id, error = worms_rest_client.get_aphia_id_by_name(valid_name)
-                        if valid_name not in self.taxa_worms_dict:
-                            (worms_rec, error,) = self.worms_client.get_record_by_aphiaid(
+                        # Use valid taxa.
+                        if aphia_id == valid_aphia_id:
+                            self.taxa_worms_dict[scientific_name] = worms_rec
+                            self.taxa_worms_by_aphia_id_dict[aphia_id] = worms_rec
+                        else:
+                            # aphia_id, error = worms_rest_client.get_aphia_id_by_name(valid_name)
+                            if valid_name not in self.taxa_worms_dict:
+                                (
+                                    worms_rec,
+                                    error,
+                                ) = self.worms_client.get_record_by_aphiaid(
+                                    valid_aphia_id
+                                )
+                                if error:
+                                    self.errors_list.append(["", valid_aphia_id, error])
+                                # Replace 'None' by space.
+                                for key in worms_rec.keys():
+                                    if worms_rec[key] in ["None", None]:
+                                        worms_rec[key] = ""
+                                # Translate keys from WoRMS.
+                                for (
+                                    from_key,
+                                    to_key,
+                                ) in self.rename_worms_header_items.items():
+                                    worms_rec[to_key] = worms_rec.get(from_key, "")
+                                #
+                                self.taxa_worms_dict[valid_name] = worms_rec
+                                self.taxa_worms_by_aphia_id_dict[
+                                    valid_aphia_id
+                                ] = worms_rec
+                            # Add invalid names to translate file.
+                            if scientific_name not in self.translate_to_worms_dict:
+                                translate_dict = {}
+                                translate_dict["scientific_name_from"] = scientific_name
+                                translate_dict["scientific_name_to"] = valid_name
+                                translate_dict["aphia_id_from"] = aphia_id
+                                translate_dict["aphia_id_to"] = valid_aphia_id
+                                self.translate_to_worms_dict[
+                                    scientific_name
+                                ] = translate_dict
+
+                            # Step 5. Create classification dictionary.
+                            (
+                                worms_rec,
+                                error,
+                            ) = self.worms_client.get_classification_by_aphiaid(
                                 valid_aphia_id
                             )
                             if error:
                                 self.errors_list.append(["", valid_aphia_id, error])
-                            # Replace 'None' by space.
-                            for key in worms_rec.keys():
-                                if worms_rec[key] in ["None", None]:
-                                    worms_rec[key] = ""
-                            # Translate keys from WoRMS.
-                            for (
-                                from_key,
-                                to_key,
-                            ) in self.rename_worms_header_items.items():
-                                worms_rec[to_key] = worms_rec.get(from_key, "")
-                            #
-                            self.taxa_worms_dict[valid_name] = worms_rec
-                            self.taxa_worms_by_aphia_id_dict[valid_aphia_id] = worms_rec
-                        # Add invalid names to translate file.
-                        if scientific_name not in self.translate_to_worms_dict:
-                            translate_dict = {}
-                            translate_dict["scientific_name_from"] = scientific_name
-                            translate_dict["scientific_name_to"] = valid_name
-                            translate_dict["aphia_id_from"] = aphia_id
-                            translate_dict["aphia_id_to"] = valid_aphia_id
-                            self.translate_to_worms_dict[scientific_name] = translate_dict
 
-                    # Step 5. Create classification dictionary.
-                    (worms_rec, error,) = self.worms_client.get_classification_by_aphiaid(
-                        valid_aphia_id
-                    )
-                    if error:
-                        self.errors_list.append(["", valid_aphia_id, error])
                     # Replace 'None' by space.
                     for key in worms_rec.keys():
                         if worms_rec[key] in ["None", None]:
@@ -353,11 +410,14 @@ class SharkSpeciesListGenerator():
         for scientific_name in list(self.taxa_worms_dict.keys()):
             classification_list = []
             taxon_dict = self.taxa_worms_dict[scientific_name]
-            name = taxon_dict['scientific_name']
+            name = taxon_dict["scientific_name"]
             level_counter = 0  # To avoid recursive enless loops.
             while len(name) > 0:
                 if level_counter > 20:
-                    print("Warning: Too many levels in classification for: " + scientific_name)
+                    print(
+                        "Warning: Too many levels in classification for: "
+                        + scientific_name
+                    )
                     break
                 level_counter += 1
                 classification_list.append(
@@ -373,9 +433,9 @@ class SharkSpeciesListGenerator():
                 parent_id = taxon_dict.get("parent_id", "")
                 taxon_dict = self.taxa_worms_by_aphia_id_dict.get(parent_id, None)
                 if taxon_dict:
-                    name = taxon_dict.get('scientific_name', '')
+                    name = taxon_dict.get("scientific_name", "")
                 else:
-                    name = ''
+                    name = ""
             #
             self.taxa_worms_dict[scientific_name]["classification"] = " - ".join(
                 classification_list[::-1]
@@ -546,4 +606,3 @@ class SharkSpeciesListGenerator():
                         )
                     except:
                         pass
-

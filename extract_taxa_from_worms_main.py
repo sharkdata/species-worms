@@ -9,6 +9,9 @@ import wormsextractor
 if __name__ == "__main__":
     """ """
     taxa_mgr = wormsextractor.SharkSpeciesListGenerator(
-        data_in_path="data_in", data_out_path="data_out"
+        data_in_path="data_in", 
+        data_out_path="data_out",
+        # replace_not_valid_taxa=True,
+        replace_not_valid_taxa=False,
     )
     taxa_mgr.run_all()
