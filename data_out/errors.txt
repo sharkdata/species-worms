@@ -1,2 +1,0 @@
-scientific_name	aphia_id	error
-Pica pica		Species: Pica pica  Response code: 204
