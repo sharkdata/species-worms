@@ -1,5 +1,0 @@
-scientific_name	comment
-Macoma calcarea	Ok.
-Macoma balthica	Should be translated to Limecola baltica.
-Pica pica	Not a marine species.
-Ceratium tripos	Multiple taxa.
