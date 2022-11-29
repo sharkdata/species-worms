@@ -9,9 +9,9 @@ The WoRMS REST webservice (http://www.marinespecies.org/rest/) is used to access
 
 Check that Python3, venv and git are installed. Create a directory for the code. Start a terminal window.
 
-    git clone https://github.com/sharkdata/species.git
-    cd species
-    python3 -m venv venv
+    git clone https://github.com/sharkdata/species-worms.git
+    cd species-worms
+    python -m venv venv
     source venv/bin/activate # On Windows "venv\Scripts\activate".
     pip install -r requirements.txt # Not required if empty.
 
@@ -27,6 +27,10 @@ If there are problems with homonyms there is a possibility to add AphiaId.
 Use the file **data_in/indata_taxa_by_aphia_id.txt**.
 
 Run the command:
+    # On Linux:
+    source venv/bin/activate 
+    # On Windows:
+    venv\Scripts\activate
 
     python extract_taxa_from_worms_main.py
 
