@@ -28,7 +28,7 @@ class WormsRestClient:
             return (worms_record, error)
 
         # Ask REST API.
-        url = "http://www.marinespecies.org/rest/AphiaRecordByAphiaID/" + str(aphia_id)
+        url = "https://www.marinespecies.org/rest/AphiaRecordByAphiaID/" + str(aphia_id)
         result_dict = {}
         error = ""
         try:
@@ -60,7 +60,7 @@ class WormsRestClient:
             return (worms_record, error)
 
         # Ask REST API.
-        url = "http://www.marinespecies.org/rest/AphiaClassificationByAphiaID/" + str(
+        url = "https://www.marinespecies.org/rest/AphiaClassificationByAphiaID/" + str(
             aphia_id
         )
         result_dict = {}
