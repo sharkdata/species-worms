@@ -41,10 +41,12 @@ class TaxaListGenerator:
         self.new_aphia_id_list = []
         self.higher_taxa_dict = {}  # Key: aphia_id.
 
+
         self.rename_worms_header_items = {
             "AphiaID": "aphia_id",
             "valid_AphiaID": "valid_aphia_id",
             "scientificname": "scientific_name",
+            "lsid": "lsid", # MH adderar LSID
         }
 
     def define_out_headers(self):
@@ -53,6 +55,7 @@ class TaxaListGenerator:
             "AphiaID": "aphia_id",
             "valid_AphiaID": "valid_aphia_id",
             "scientificname": "scientific_name",
+            "lsid": "lsid", # MH adderar LSID
         }
 
         self.taxa_worms_header = [
@@ -82,7 +85,7 @@ class TaxaListGenerator:
             #             "unacceptreason",
             #             "citation",
             #             "url",
-            #             "lsid",
+            "lsid", # MH adderar LSID
             #             "match_type",
             #             "modified",
         ]
@@ -147,6 +150,7 @@ class TaxaListGenerator:
                     scientific_name = worms_rec.get("scientificname", "")
                     valid_aphia_id = worms_rec.get("valid_AphiaID", "")
                     valid_name = worms_rec.get("valid_name", "")
+                    lsid = worms_rec.get("lsid", "") # MH adderar LSID
 
                     print(
                         "Processing",
@@ -185,6 +189,7 @@ class TaxaListGenerator:
                         aphia_id = current_node.get("AphiaID", "")
                         rank = current_node.get("rank", "")
                         scientific_name = current_node.get("scientificname", "")
+                        lsid = current_node.get("lsid", "") # MH adderar LSID
                         if aphia_id and rank and scientific_name:
                             taxa_dict = {}
                             taxa_dict["aphia_id"] = aphia_id
@@ -192,6 +197,7 @@ class TaxaListGenerator:
                             taxa_dict["scientific_name"] = scientific_name
                             taxa_dict["parent_id"] = parent_id
                             taxa_dict["parent_name"] = parent_name
+                            taxa_dict["lsid"] = lsid # MH adderar LSID
                             # Replace 'None' by space.
                             for key in taxa_dict.keys():
                                 if taxa_dict[key] in ["None", None]:
@@ -235,6 +241,7 @@ class TaxaListGenerator:
             if higher_taxa_dict:
                 taxa_dict["parent_id"] = higher_taxa_dict.get("parent_id", "")
                 taxa_dict["parent_name"] = higher_taxa_dict.get("parent_name", "")
+
 
     def add_classification(self):
         """Add classification."""
